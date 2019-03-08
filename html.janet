@@ -13,8 +13,8 @@
 
 (defn- opening-tag
   [name params]
-  (def attrs (reduce append-attr "" (pairs params)))
-  (string "<" name attrs ">"))
+  (let [attrs (reduce append-attr "" (pairs params))]
+    (string "<" name attrs ">")))
 
 (defn- closing-tag
   [name]
@@ -38,7 +38,7 @@
           (create children)
           (indexed? child)
           (reduce append-child "" children)
-          :default child)))
+          :else child)))
 
 (defn- children-as-params?
   [params children]
@@ -67,15 +67,15 @@
         [name {} children]
         (first-nil? children params)
         [name params ""]
-        :default
+        :else
         [name params children]))
 
 (defn create
   [element]
   (let [[name params children] (normalize-args element)
         body (opening-tag name params)]
-        (if (empty-element? name)
-            body
-            (string body
-                    (create-children create children)
-                    (closing-tag name)))))
+    (if (empty-element? name)
+        body
+        (string body
+                (create-children create children)
+                (closing-tag name)))))
