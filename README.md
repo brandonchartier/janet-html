@@ -10,8 +10,8 @@
 
 (defn todo-fmt
   [todo]
-  [[:span (get todo :id)]
-   [:span (get todo :text)]])
+  [[:span (todo :id)]
+   [:span (todo :text)]])
 
 (defn todo-view
   [todo]
@@ -25,6 +25,6 @@
 (print (html/create [:div (todos-view todos)]))
 (print (html/create [:img {:src "/dog.gif"}]))
 (print (html/create [:br]))
-(print (html/create [:p {:custom-attr "custom value"}]))
+(print (html/create [:p {:custom-attr "custom value"} "Lorem ipsum"]))
 (print (html/create [:a {:href "http://github.com"} "GitHub"]))
 ```

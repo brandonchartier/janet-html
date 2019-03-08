@@ -57,7 +57,7 @@
   (and (nil? a)
        (not (nil? b))))
 
-(defn- normalize-args
+(defn- normalize-element
   [[name params children]]
   (cond (children-as-params? params children)
         [name {} params]
@@ -72,7 +72,7 @@
 
 (defn create
   [element]
-  (let [[name params children] (normalize-args element)
+  (let [[name params children] (normalize-element element)
         body (opening-tag name params)]
     (if (empty-element? name)
         body
