@@ -25,6 +25,7 @@
 (print (html/create [:div (todos-view todos)]))
 (print (html/create [:img {:src "/dog.gif"}]))
 (print (html/create [:br]))
-(print (html/create [:p {:custom-attr "custom value"} "Lorem ipsum"]))
+(print (html/create [:p "Lorem ipsum"]))
 (print (html/create [:a {:href "http://github.com"} "GitHub"]))
+(print (html/create [:span "Hello " [:em "world!"]]))
 ```
