@@ -1,35 +1,43 @@
-(def- empty-elements
+(import helpers :as h)
+
+(def empty-elements
   [:area :base :br :col :embed
    :hr :img :input :keygen :link
    :meta :param :source :track :wbr])
 
-(defn- empty-element?
+(defn empty-element?
   [name]
   (some (partial = name) empty-elements))
 
-(defn- append-attr
+(defn append-attr
   [acc [attr value]]
   (string acc " " attr "=\"" value "\""))
 
-(defn- opening-tag
+(defn create-attributes
+  [attrs]
+  (if (dictionary? attrs)
+      (reduce append-attr "" (pairs attrs))
+      ""))
+
+(defn opening-tag
   [name params]
-  (let [attrs (reduce append-attr "" (pairs params))]
+  (let [attrs (create-attributes params)]
     (string "<" name attrs ">")))
 
-(defn- closing-tag
+(defn closing-tag
   [name]
   (string "</" name ">"))
 
-(defn- first-child
+(defn first-child
   [children]
   (if (indexed? children)
       (first children)
       children))
 
-(defn- create-children
+(defn create-children
   [create children]
 
-  (defn- append-child
+  (defn append-child
     [acc child]
     (string acc (create child)))
 
@@ -40,42 +48,43 @@
           (reduce append-child "" children)
           :else child)))
 
-(defn- children-as-params?
+(defn children-as-params?
   [params children]
   (and (nil? children)
        (or (indexed? params)
            (number? params)
            (bytes? params))))
 
-(defn- both-nil?
-  [a b]
-  (and (nil? a)
-       (nil? b)))
-
-(defn- first-nil?
-  [a b]
-  (and (nil? a)
-       (not (nil? b))))
-
-(defn- normalize-element
+(defn normalize-element
   [[name params children]]
   (cond (children-as-params? params children)
         [name {} params]
-        (both-nil? params children)
+        (h/all-nil? params children)
         [name {} ""]
-        (first-nil? params children)
+        (h/first-nil? params children)
         [name {} children]
-        (first-nil? children params)
+        (h/first-nil? children params)
         [name params ""]
         :else
         [name params children]))
+
+(defn text-node-with-children?
+  [params children]
+  (and (string? params)
+       (indexed? children)))
 
 (defn create
   [element]
   (let [[name params children] (normalize-element element)
         body (opening-tag name params)]
-    (if (empty-element? name)
-        body
-        (string body
-                (create-children create children)
-                (closing-tag name)))))
+    (cond (empty-element? name)
+          body
+          (text-node-with-children? params children)
+          (string body
+                  params
+                  (create-children create children)
+                  (closing-tag name))
+          :else
+          (string body
+                  (create-children create children)
+                  (closing-tag name)))))
