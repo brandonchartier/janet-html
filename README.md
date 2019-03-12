@@ -1,31 +1,32 @@
 # html
 
 ```
-(import html)
+(import html :as h)
 
-(def todos
+(def todo-data
   [{:id 1 :text "foo"}
    {:id 2 :text "bar"}
    {:id 3 :text "baz"}])
 
 (defn todo-fmt
   [todo]
-  [[:span (todo :id)]
-   [:span (todo :text)]])
+  [[:text (todo :id)]
+   [:strong (todo :text)]])
 
 (defn todo-view
   [todo]
   [:li (todo-fmt todo)])
 
 (defn todos-view
-  [todos]
+  [data]
   [:ul {:id "foo" :class "bar"}
-    (map todo-view todos)])
+    (map todo-view data)])
 
-(print (html/create [:div (todos-view todos)]))
-(print (html/create [:img {:src "/dog.gif"}]))
-(print (html/create [:br]))
-(print (html/create [:p "Lorem ipsum"]))
-(print (html/create [:a {:href "http://github.com"} "GitHub"]))
-(print (html/create [:span "Hello " [:em "world!"]]))
+(print (h/create [:div (todos-view todo-data)]))
+(print (h/create [:img {:src "/dog.gif"}]))
+(print (h/create [:br]))
+(print (h/create [:p "Lorem ipsum"]))
+(print (h/create [:a {:href "http://github.com"} "GitHub"]))
+(print (h/create [:span [[:text "Hello "] [:em "world!"]]]))
+
 ```

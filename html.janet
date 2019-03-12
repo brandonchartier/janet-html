@@ -1,28 +1,27 @@
-(import helpers :as h)
-
-(def empty-elements
+(def void-elements
   [:area :base :br :col :embed
    :hr :img :input :keygen :link
    :meta :param :source :track :wbr])
 
-(defn empty-element?
+(defn void-element?
   [name]
-  (some (partial = name) empty-elements))
+  (some (partial = name) void-elements))
 
-(defn append-attr
+(defn text-element?
+  [name]
+  (= name :text))
+
+(defn attr-reducer
   [acc [attr value]]
   (string acc " " attr "=\"" value "\""))
 
-(defn create-attributes
+(defn create-attrs
   [attrs]
-  (if (dictionary? attrs)
-      (reduce append-attr "" (pairs attrs))
-      ""))
+  (reduce attr-reducer "" (pairs attrs)))
 
 (defn opening-tag
-  [name params]
-  (let [attrs (create-attributes params)]
-    (string "<" name attrs ">")))
+  [name attrs]
+  (string "<" name (create-attrs attrs) ">"))
 
 (defn closing-tag
   [name]
@@ -37,54 +36,52 @@
 (defn create-children
   [create children]
 
-  (defn append-child
+  (defn child-reducer
     [acc child]
     (string acc (create child)))
 
   (let [child (first-child children)]
-    (cond (keyword? child)
+    (cond (indexed? child)
+          (reduce child-reducer "" children)
+          (keyword? child)
           (create children)
-          (indexed? child)
-          (reduce append-child "" children)
-          :else child)))
+          :else children)))
 
-(defn children-as-params?
-  [params children]
-  (and (nil? children)
-       (or (indexed? params)
-           (number? params)
-           (bytes? params))))
+(defn valid-children?
+  [children]
+  (or (indexed? children)
+      (number? children)
+      (string? children)))
 
-(defn normalize-element
-  [[name params children]]
-  (cond (children-as-params? params children)
-        [name {} params]
-        (h/all-nil? params children)
-        [name {} ""]
-        (h/first-nil? params children)
-        [name {} children]
-        (h/first-nil? children params)
-        [name params ""]
+(defn validate-element
+  [name attrs children]
+  (unless (keyword? name)
+          (error "name must be a keyword"))
+  (unless (dictionary? attrs)
+          (error "attributes must be a dictionary"))
+  (unless (valid-children? children)
+          (error "children must be a string, number, or index")))
+
+(defn create-element
+  [create name attrs children]
+  (validate-element name attrs children)
+  (cond (void-element? name)
+        (opening-tag name attrs)
+        (text-element? name)
+        (string children)
         :else
-        [name params children]))
-
-(defn text-node-with-children?
-  [params children]
-  (and (string? params)
-       (indexed? children)))
+        (string (opening-tag name attrs)
+                (create-children create children)
+                (closing-tag name))))
 
 (defn create
   [element]
-  (let [[name params children] (normalize-element element)
-        body (opening-tag name params)]
-    (cond (empty-element? name)
-          body
-          (text-node-with-children? params children)
-          (string body
-                  params
-                  (create-children create children)
-                  (closing-tag name))
-          :else
-          (string body
-                  (create-children create children)
-                  (closing-tag name)))))
+  (match (array/slice element)
+    @[name attrs children]
+    (create-element create name attrs children)
+    @[name param]
+    (if (dictionary? param)
+        (create-element create name param "")
+        (create-element create name {} param))
+    @[name]
+    (create-element create name {} "")))
