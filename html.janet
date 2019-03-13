@@ -87,19 +87,19 @@
     (create-element create name {} "")))
 
 (defn img
-  [src alt attrs &]
+  [src &opt alt attrs]
   (default alt "")
   (default attrs {})
   [:img (merge attrs {:src src :alt alt})])
 
 (defn link
-  [url content attrs &]
+  [url &opt content attrs]
   (default content url)
   (default attrs {})
   [:a (merge attrs {:href url}) content])
 
 (defn mail
-  [email content attrs &]
+  [email &opt content attrs]
   (default content email)
   (default attrs {})
   [:a (merge attrs {:href (string "mailto:" email)}) content])
