@@ -76,15 +76,15 @@
 
 (defn create
   [element]
-  (match (array/slice element)
-    @[name attrs children]
-    (create-element create name attrs children)
-    @[name param]
-    (if (dictionary? param)
-        (create-element create name param "")
-        (create-element create name {} param))
-    @[name]
-    (create-element create name {} "")))
+  (case (length element)
+    1 (let [[name] element]
+        (create-element create name {} ""))
+    2 (let [[name param] element]
+        (if (dictionary? param)
+            (create-element create name param "")
+            (create-element create name {} param)))
+    3 (let [[name attrs children] element]
+        (create-element create name attrs children))))
 
 (defn img
   [src &opt alt attrs]
