@@ -30,8 +30,8 @@
 (defn first-child
   [children]
   (if (indexed? children)
-      (first children)
-      children))
+    (first children)
+    children))
 
 (defn create-children
   [create children]
@@ -42,10 +42,10 @@
 
   (let [child (first-child children)]
     (cond (indexed? child)
-          (reduce child-reducer "" children)
-          (keyword? child)
-          (create children)
-          :else children)))
+      (reduce child-reducer "" children)
+      (keyword? child)
+      (create children)
+      :else children)))
 
 (defn valid-children?
   [children]
@@ -56,23 +56,23 @@
 (defn validate-element
   [name attrs children]
   (unless (keyword? name)
-          (error "name must be a keyword"))
+    (error "name must be a keyword"))
   (unless (dictionary? attrs)
-          (error "attributes must be a dictionary"))
+    (error "attributes must be a dictionary"))
   (unless (valid-children? children)
-          (error "children must be a string, number, or index")))
+    (error "children must be a string, number, or index")))
 
 (defn create-element
   [create name attrs children]
   (validate-element name attrs children)
   (cond (void-element? name)
-        (opening-tag name attrs)
-        (text-element? name)
-        (string children)
-        :else
-        (string (opening-tag name attrs)
-                (create-children create children)
-                (closing-tag name))))
+    (opening-tag name attrs)
+    (text-element? name)
+    (string children)
+    :else
+    (string (opening-tag name attrs)
+            (create-children create children)
+            (closing-tag name))))
 
 (defn create
   [element]
@@ -81,8 +81,8 @@
         (create-element create name {} ""))
     2 (let [[name param] element]
         (if (dictionary? param)
-            (create-element create name param "")
-            (create-element create name {} param)))
+          (create-element create name param "")
+          (create-element create name {} param)))
     3 (let [[name attrs children] element]
         (create-element create name attrs children))))
 

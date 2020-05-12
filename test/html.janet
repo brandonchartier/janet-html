@@ -1,11 +1,4 @@
-# Janet HTML
-
-`jpm install https://github.com/brandonchartier/janet-html`
-
----
-
-```
-(import html :as h)
+(import ../html :as h)
 
 (def todo-data
   [{:id 1 :value "foo"}
@@ -49,4 +42,3 @@
 
 (assert (deep= (h/create [:span [[:text "Hello "] [:em "world!"]]])
                "<span>Hello <em>world!</em></span>"))
-```
